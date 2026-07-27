@@ -1,0 +1,58 @@
+# ── 요구사항 원본 문서 (제3자 소유, 레포에 포함하지 않음) ──
+# specs/process.md 8장 참조. 기술 요구사항만 재작성해서 남긴다.
+*.pdf
+*.pptx
+*.docx
+*.xlsx
+/reference/
+/private/
+
+# ── 시크릿 ──
+# .env.example 은 커밋한다 (키 이름만, 값은 빈칸)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.jks
+
+# ── 자바 / 그레이들 / 메이븐 ──
+build/
+out/
+target/
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.jar
+*.war
+hs_err_pid*
+
+# ── Node / Next.js ──
+node_modules/
+.next/
+dist/
+coverage/
+*.tsbuildinfo
+.turbo/
+
+# ── 테스트 산출물 ──
+playwright-report/
+test-results/
+blob-report/
+.playwright/
+
+# ── IDE ──
+.idea/
+*.iml
+.vscode/
+!.vscode/extensions.json
+*.swp
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+
+# ── 로그 (앱은 stdout으로만 쓴다 — process.md 4.9) ──
+*.log
+logs/
