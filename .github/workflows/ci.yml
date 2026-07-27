@@ -1,0 +1,60 @@
+name: CI
+
+# process.md 9번 게이트.
+# 이 워크플로가 실패하면 브랜치 보호 규칙이 머지 버튼을 물리적으로 막는다.
+# "클코가 로컬에서 돌리고 통과했다고 보고하는" 구조는 검증이 불가능하므로 게이트가 아니다.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  # 아래 두 트리거에서는 gitleaks가 히스토리 "전체"를 스캔한다 (PR에서는 새 커밋만).
+  # 필요한 이유 2개:
+  #   1. 이 워크플로가 생기기 전의 커밋들은 한 번도 스캔되지 않았다
+  #   2. enforce_admins=false 라서 관리자가 보호 규칙을 우회해 push할 수 있다.
+  #      그 경로로 들어온 커밋은 PR 스캔에 걸리지 않는다
+  schedule:
+    - cron: '0 0 * * 1' # 매주 월요일 00:00 UTC
+  workflow_dispatch:
+
+# 최소 권한. 이 워크플로는 코드를 읽기만 한다.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ── process.md 4.10 시크릿 ──
+  # GitHub Push Protection이 알려진 형식의 키(AWS·Stripe 등)를 push 단계에서 막지만,
+  # DB 비밀번호처럼 패턴이 없는 문자열은 못 잡는다. gitleaks가 엔트로피 기반으로 보완한다.
+  # 시크릿 커밋은 이 프로젝트에서 유일하게 복구 불가능한 실수다(키 폐기밖에 방법이 없음).
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # 기본값(얕은 클론)이면 과거 커밋이 로컬에 없어서 스캔 대상에서 빠진다.
+          # PR 이벤트에서는 gitleaks가 그 PR의 커밋 범위만 보고,
+          # schedule/workflow_dispatch 에서는 히스토리 전체를 본다.
+          # 후자가 성립하려면 전체 히스토리가 받아져 있어야 한다.
+          fetch-depth: 0
+
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── 아래는 스택 확정 후 채운다 ──
+  # lint / build / test 는 자바 버전·빌드도구(Gradle vs Maven)·Node 버전이 정해져야 쓸 수 있고,
+  # 그 결정은 process.md 4번 plan 단계에 속한다. 순서를 뒤집지 않는다.
+  #
+  #  lint:
+  #  build:
+  #  test:        ← 단위 + 통합(Testcontainers는 Docker 필요, Actions가 지원)
+  #  e2e:         ← @smoke 태그만. 전체 E2E는 별도 잡
+  #
+  # 잡을 추가하면 브랜치 보호의 "필수 상태 체크"에도 등록해야 게이트가 된다.
+  # 등록하지 않으면 잡은 돌지만 실패해도 머지를 막지 못한다.
