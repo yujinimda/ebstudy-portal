@@ -55,14 +55,15 @@
 |---|---|---|---|---|
 | 0 | 레포 초기화 + `specs/` 골격 | — | | |
 | 1 | 아이디어 → brainstorming | superpowers | 설계 승인 | 설계 문서 |
-| 2 | 스펙 문서화 ★ **AC = Given/When/Then + AC-ID** | Spec Kit | | `spec.md` |
-| 3 | 스펙 검증 (엣지케이스·모순 색출) | grill-me | `NEEDS CLARIFICATION` 0개 | `spec.md` 보강 |
+| 2 | 스펙 문서화 ★ **AC = Given/When/Then + AC-ID** | `/speckit-specify` | | `spec.md` |
+| 3 | 스펙 검증 (엣지케이스·모순 색출) | ★ `/speckit-clarify` | `NEEDS CLARIFICATION` 0개 | `spec.md` 보강 |
 | **3.5** | ★ **DB 논리 설계** — 사람이 ERD 작성 → Claude 리뷰 → codex 검증 | 사람 주도 | codex APPROVED | `data-model.md` |
 | **3.9** | ★ **테스트 전략 1회 작성** (프로젝트 전역) | Claude 초안 | | `test-strategy.md` |
-| 4 | 기술 계획 ★ **+ 호스팅·시크릿·롤백 결정 명시** | Spec Kit | | `plan.md` |
+| 4 | 기술 계획 ★ **+ 호스팅·시크릿·롤백 결정 명시** | `/speckit-plan` | Constitution Check 통과 | `plan.md` |
 | 5 | 계획 크로스 검증 | codex exec | APPROVED | 판정 기록 |
-| 6 | 작업 분해 + 레인 배분 + 머지 순서 | Spec Kit | | `tasks.md` |
-| 6.5 | tasks 정합성 검증 (커버리지·의존·소유권 충돌) | codex exec | APPROVED | 판정 기록 |
+| 6 | 작업 분해 + 레인 배분 + 머지 순서 | `/speckit-tasks` | | `tasks.md` |
+| 6.4 | ★ 산출물 내부 정합성 (spec↔plan↔tasks) | `/speckit-analyze` | 불일치 0건 | 판정 기록 |
+| 6.5 | tasks **실행** 정합성 (레인 소유권·머지 순서) | codex exec | APPROVED | 판정 기록 |
 | **6.7** | ★ **마이그레이션 SQL 일괄 작성** — 사람 단독 → 리뷰 → main 머지 | 사람 주도 | 리뷰 통과 | `V*.sql` |
 | 7 | 병렬 구현 (레인별 worktree) — **테스트 레인은 역할 역전** | Orca | | 코드 |
 | 8 | 코드 크로스 리뷰 (diff, read-only) | codex-review | APPROVED | 판정 기록 |
@@ -96,12 +97,62 @@ specs/
     ADR-001-....md
   learning/           ← 개념당 1파일
     2026-07-27-....md
-  001-<story>/        ← 스토리별
+  001-<story>/        ← 스토리별 (브랜치명과 동일)
     spec.md
     plan.md
     tasks.md
     qa.md             ← 9.5 QA 실행 기록
+
+.specify/
+  memory/constitution.md   ← ★ 4장 규칙의 실행 가능한 요약. AI가 매 스펙·계획마다 대조
+  templates/               ← spec/plan/tasks 템플릿 (constitution에 맞게 수정됨)
+  scripts/bash/            ← create-new-feature.sh 등
+.claude/skills/speckit-*/  ← /speckit-* 커맨드
+.github/workflows/ci.yml   ← 9번 게이트
+.env.example               ← 키 이름만 (4.10)
 ```
+
+### constitution — 규칙을 AI 기억에서 도구로 옮긴다
+
+`specs/process.md`가 **단일 진실**이고, `.specify/memory/constitution.md`는 그것의
+**실행 가능한 요약**이다. 같은 규칙이 두 곳에 있는 게 중복처럼 보이지만 역할이 다르다:
+
+| | 독자 | 담는 것 |
+|---|---|---|
+| `process.md` | 사람 | 규칙 + **왜 그렇게 정했는지** + 버린 대안 + 결정 이력 |
+| `constitution.md` | AI | 규칙만. `/speckit-plan`이 **Constitution Check로 매번 대조** |
+
+**이것이 중요한 이유:** 규칙을 `process.md`에만 두면 그건 *AI가 기억해야 하는 것*이고,
+잊으면 그냥 어겨진다. constitution에 넣으면 계획 단계에서 자동으로 대조된다.
+**9번을 CI로 옮긴 것과 같은 종류의 개선이다** — 게이트를 성실성에서 도구로 옮기는 것.
+
+**갱신 방향은 한쪽뿐이다.** 규칙이 바뀌면 `process.md`를 먼저 고치고 constitution을 동기화한다.
+역방향 금지.
+
+### spec-kit 커맨드 채택 현황
+
+| 커맨드 | 채택 | 판단 |
+|---|---|---|
+| `/speckit-constitution` | ✅ | 4장 규칙을 원칙으로. 위 참조 |
+| `/speckit-specify` | ✅ | 2번 |
+| `/speckit-clarify` | ✅ | 3번. **grill-me를 대체.** spec-kit 템플릿의 `NEEDS CLARIFICATION` 마커와 직접 연동되고 스펙 파일을 직접 갱신한다 |
+| `/speckit-plan` | ✅ | 4번 + Constitution Check |
+| `/speckit-tasks` | ✅ | 6번 |
+| `/speckit-analyze` | ✅ | 6.4번 신설. spec↔plan↔tasks **내부** 정합성 |
+| `/speckit-implement` | ❌ | 7번은 오르카 병렬 레인. 겹치는 게 아니라 대체 관계이고 오르카를 선택했다 |
+| `/speckit-checklist` | ⏸ 보류 | 5번 codex 계획 검증과 겹친다. 첫 스토리에서 5번이 부족하면 추가 |
+| `/speckit-converge` | ⏸ 보류 | `/speckit-implement` 전제라 현재 구조와 맞지 않음 |
+| `/speckit-taskstoissues` | ⏸ 보류 | 오르카가 레인 배분을 하므로 GitHub Issue가 중복 |
+
+**보류 항목을 지금 추측으로 정하지 않는 이유:** 게이트는 **실제로 무엇을 잡아내는지**로
+판단해야 한다. 그것이 10.7 회고의 "게이트가 무엇을 잡았고 무엇을 놓쳤나" 항목이고,
+첫 스토리가 그 실측 기회다.
+
+**전파 시 발견한 충돌 (기록):** `tasks-template.md`가 원래
+`"Tests are OPTIONAL - only include them if explicitly requested"` 였다.
+원칙 I(테스트 우선, NON-NEGOTIABLE)과 정면 충돌하므로 MANDATORY로 고쳤다.
+constitution을 도입하지 않았다면 이 충돌은 발견되지 않았고, 태스크 분해에서 테스트가
+조용히 빠졌을 것이다.
 
 **ADR을 스토리 폴더가 아니라 전역에 두는 이유:**
 1. ADR 번호가 프로젝트 전체에서 연속이어야 "ADR-004를 ADR-011이 대체함" 같은 참조가 가능
@@ -415,7 +466,8 @@ JSON으로 쓰는 이유: 로그 1줄 = 레코드 1개로 구조화되어
 | 게이트 | 판정자 | 종료 조건 |
 |---|---|---|
 | 1 설계 승인 | 사람 | 승인 전 코드 작성 금지 |
-| 3 스펙 검증 | grill-me | `NEEDS CLARIFICATION` 0개 |
+| 3 스펙 검증 | `/speckit-clarify` + 사람 | `NEEDS CLARIFICATION` 0개 |
+| 4 Constitution Check | `/speckit-plan` | 위반 0건 또는 ADR로 근거 기록 |
 | 3.5 DB 설계 | codex | APPROVED |
 | 5 계획 검증 | codex | APPROVED |
 | 6.5 tasks 정합성 | codex | APPROVED |
@@ -436,15 +488,19 @@ JSON으로 쓰는 이유: 로그 1줄 = 레코드 1개로 구조화되어
 - 설계 문제 → plan 수정 후 6번부터 재분해
 
 **브랜치 · PR**
-- 기획(2~6): `spec/NNN-이름` 브랜치 → **게이트 통과 시 클코가 즉시 머지** (사람 확인 대기 없음)
+- 기획(2~6): **`NNN-이름` 브랜치** → **게이트 통과 시 클코가 즉시 머지** (사람 확인 대기 없음)
+  - 접두사(`spec/`)를 붙이지 않는다. `create-new-feature.sh`가 브랜치를 자동 생성하므로
+    규칙을 다르게 두면 매번 손으로 rename해야 하고, 스크립트가 브랜치명으로 spec 폴더를
+    찾을 수 있어 rename이 깨질 위험이 있다. **도구 자동화와 싸우지 않는다.**
+    브랜치 번호가 곧 스토리 번호라 접두사 없이도 혼동이 없다.
 - 개발: PR 생성 = 9번 통과 후 / PR 머지 = 10번. 둘 다 클코가 `gh` CLI로 수행
 
 **PR 승인자를 두지 않는다** (승인 필요 인원 = 0명)
 
 1. GitHub에서는 **자기 PR을 자기가 승인할 수 없다.** 1인 개발에서 1명 이상으로 두면
    영구히 머지가 불가능해진다.
-2. 사람 게이트는 PR 승인이 아니라 **3번 grill-me**(기획 산출물)와
-   **9.5 기능 QA**(구현)에 있다. grill-me는 사람이 직접 질문에 답하는 단계이므로
+2. 사람 게이트는 PR 승인이 아니라 **3번 스펙 검증**(기획 산출물)과
+   **9.5 기능 QA**(구현)에 있다. 3번은 사람이 직접 질문에 답하는 단계이므로
    스펙을 읽지 않고 통과할 수 없다.
    → PR 승인 칸은 이 둘과 중복이다. **게이트를 없앤 것이 아니라 위치를 옮긴 것.**
 
@@ -536,7 +592,12 @@ PR마다 백엔드 환경이 자동으로 떠야 한다.
 | 18 | GitHub 스캐닝 + gitleaks | 기본 3층만 / 시크릿 매니저 | 시크릿 커밋은 유일하게 복구 불가(키 폐기밖에 없음). GitHub 기본은 DB 비밀번호를 못 잡음 | **사용자 질문**("시크릿 관리는 보통 env아냐?", "실제 실무에서는 어떻게 하는데?") |
 | 19 | 백엔드 호스팅 **보류** | 지금 결정 | 사용자 판단: 만들 것을 정하고 나서 결정 | **사용자 결정** |
 | 20 | 요구사항 원천을 추상화해 공개 | 비공개 레포 / 그대로 공개 | 원 문서가 제3자 소유. 공개 push는 캐시·포크·크롤러에 남아 비가역. 출처를 지워도 학습 기록의 가치는 그대로 | **사용자 결정** |
-| 21 | PR 승인자 0명, 게이트 통과 시 즉시 머지 | 사람 최종 확인 후 머지 | 자기 PR 자기 승인 불가 → 1인 개발에서 영구 머지 불가. 사람 게이트는 3번 grill-me와 9.5 QA에 이미 있어 중복 | **사용자 결정** |
+| 21 | PR 승인자 0명, 게이트 통과 시 즉시 머지 | 사람 최종 확인 후 머지 | 자기 PR 자기 승인 불가 → 1인 개발에서 영구 머지 불가. 사람 게이트는 3번 스펙 검증과 9.5 QA에 이미 있어 중복 | **사용자 결정** |
+| 22 | constitution 채택 — 4장 규칙을 AI가 매번 대조하게 | process.md만 유지 | process.md에만 두면 규칙이 "AI가 기억해야 하는 것"이 되고 잊으면 어겨진다. Constitution Check로 자동 대조 → 게이트를 성실성에서 도구로 옮김(9번을 CI로 옮긴 것과 동종) | Claude 제안 |
+| 23 | 브랜치명 `NNN-이름` (접두사 없음) | `spec/NNN-이름` 유지 | 스크립트가 브랜치를 자동 생성한다. 규칙을 다르게 두면 매번 rename해야 하고 스크립트가 브랜치명으로 spec 폴더를 찾아 깨질 위험. **도구 자동화와 싸우지 않는다** | Claude 제안 |
+| 24 | `/speckit-clarify`가 grill-me를 대체 | grill-me 유지 / 둘 다 | clarify는 spec-kit 템플릿의 `NEEDS CLARIFICATION` 마커와 연동되고 스펙 파일을 직접 갱신한다. grill-me는 사용자 문서에도 "한 줄짜리 껍데기"로 기록돼 있었다 | Claude 제안 |
+| 25 | `/speckit-implement` 미사용 | 오르카 대신 채택 | 7번은 오르카 병렬 레인. 대체 관계이며 오르카를 이미 선택했다 | Claude 제안 |
+| 26 | 중복 게이트 3건은 **첫 스토리에서 실측 후 결정** | 지금 확정 | 게이트는 실제로 무엇을 잡아내는지로 판단해야 한다. 추측으로 정하면 틀린다. 10.7 회고의 "게이트가 뭘 잡았고 뭘 놓쳤나"가 그 판단 근거 | Claude 제안 |
 
 ### 7.3 정직한 기록 — 결정의 질에 대하여
 
