@@ -8,6 +8,14 @@ on:
   pull_request:
   push:
     branches: [main]
+  # 아래 두 트리거에서는 gitleaks가 히스토리 "전체"를 스캔한다 (PR에서는 새 커밋만).
+  # 필요한 이유 2개:
+  #   1. 이 워크플로가 생기기 전의 커밋들은 한 번도 스캔되지 않았다
+  #   2. enforce_admins=false 라서 관리자가 보호 규칙을 우회해 push할 수 있다.
+  #      그 경로로 들어온 커밋은 PR 스캔에 걸리지 않는다
+  schedule:
+    - cron: '0 0 * * 1' # 매주 월요일 00:00 UTC
+  workflow_dispatch:
 
 # 최소 권한. 이 워크플로는 코드를 읽기만 한다.
 permissions:
@@ -28,7 +36,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          # gitleaks는 히스토리 전체를 스캔한다. 얕은 클론이면 과거 커밋을 놓친다.
+          # 기본값(얕은 클론)이면 과거 커밋이 로컬에 없어서 스캔 대상에서 빠진다.
+          # PR 이벤트에서는 gitleaks가 그 PR의 커밋 범위만 보고,
+          # schedule/workflow_dispatch 에서는 히스토리 전체를 본다.
+          # 후자가 성립하려면 전체 히스토리가 받아져 있어야 한다.
           fetch-depth: 0
 
       - name: gitleaks
