@@ -2,7 +2,7 @@
 
 **Branch**: `001-user-auth` | **Date**: 2026-07-29 | **Spec**: [spec.md](./spec.md)
 
-**Input**: `specs/001-user-auth/spec.md` (AC 34개 · FR 34개) ·
+**Input**: `specs/001-user-auth/spec.md` (**AC 34개 · FR 35개** — `AC-34`·`FR-035`는 이 계획이 신설했다) ·
 `specs/data-model.md`(3.5 논리 설계) · `specs/test-strategy.md`(3.9) ·
 `ADR-001`(JWT) · `ADR-002`(기본키) · `ADR-003`(PostgreSQL) · `ADR-004`(ORM)
 

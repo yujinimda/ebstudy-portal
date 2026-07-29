@@ -42,6 +42,13 @@ test-results/
 blob-report/
 .playwright/
 
+# ── E2E 로그인 상태 파일 (test-strategy.md 4.1) ──
+# storageState 는 쿠키를 담으므로 그 자체가 자격증명이다 — 커밋하면 시크릿 유출이고,
+# 저장소가 공개라 히스토리에 영구히 남는다(process.md 4.10 · constitution 원칙 VII).
+# 게다가 Access 수명이 짧아(사용자 30분 / 관리자 15분) 캐시해 두면
+# 만료된 상태로 테스트가 시작된다. setup 을 매 실행마다 돌린다.
+frontend/e2e/auth/*.json
+
 # ── IDE ──
 .idea/
 *.iml
