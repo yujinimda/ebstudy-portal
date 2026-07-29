@@ -40,8 +40,10 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-Constitution v1.0.0 기준. 위반이 있으면 아래 Complexity Tracking 표에 근거를 적고
-ADR(`specs/decisions/`)을 남긴다. 근거 없는 예외는 없다.
+**현행 constitution 기준**(버전은 `.specify/memory/constitution.md` 하단 참조).
+**이 템플릿에 버전을 박지 않는다** — 박으면 개정 때마다 템플릿이 거짓말을 한다.
+위반이 있으면 아래 Complexity Tracking 표에 근거를 적고 ADR(`specs/decisions/`)을 남긴다.
+근거 없는 예외는 없다.
 
 - [ ] **I. 테스트 우선** — 테스트를 구현보다 먼저 작성하는 순서가 계획에 반영됐는가?
       밀집도가 API 통합 중심인가(통합 주력 / 단위는 복잡 로직만 / E2E 총 5~10개)?
