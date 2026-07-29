@@ -159,10 +159,11 @@
 
 ---
 
-## 4번 기술 계획에서 반드시 결정할 것 (누적) — **미룬 것 2건 외 전부 해소**
+## 4번 기술 계획에서 반드시 결정할 것 (누적) — **미룬 것 3건 외 전부 해소**
 
-**남은 것은 3번(첨부파일 → 002)과 9번(IP 단위 방어 → 인프라)뿐이고 둘 다 방아쇠가 박혀 있다.**
-나머지 12건은 `research.md`·`ADR-003`·`ADR-004`·`data-model.md` 물리 설계 절에서 해소됐다.
+**남은 것은 3번(첨부파일 → 002) · 9번(IP 단위 방어 → 인프라) · 15번(프론트 패키지 매니저)이고
+셋 다 방아쇠가 박혀 있다.** 나머지 12건은 `research.md`·`ADR-003`·`ADR-004`·`data-model.md`
+물리 설계 절에서 해소됐다.
 
 | # | 항목 | 상태 |
 |---|---|---|
@@ -180,6 +181,7 @@
 | 12 | JWT 라이브러리 | ✅ **확정 — Spring Security 내장(Nimbus). 별도 의존성을 추가하지 않는다.** ADR 대상은 아니다(표준이라 교체 비용이 낮음). **Access만 JWT이고 Refresh는 6번의 랜덤 문자열이다.** `research.md` 10 |
 | 13 | Testcontainers 구성 | ✅ **방향 확정** — 통합 테스트는 `.env`의 `DB_URL`을 쓰지 않고 접속 정보를 런타임 주입받는다. **이미지 태그를 로컬 Compose와 같은 값으로 고정**(`ADR-003` 리스크 2). 실제 설정 코드는 7번 |
 | 14 | E2E 실행 환경 | ✅ **확정** — `frontend/e2e/auth.setup.ts`가 4.1의 setup 자리이고, **상태 파일 `frontend/e2e/auth/*.json`을 `.gitignore`에 추가했다**(자격증명 + 짧은 Access 수명 때문에 캐시 금지) |
+| 15 | **프론트 패키지 매니저** | ⬜ **미확정** — `quickstart.md`의 `pnpm`은 표기 예시다. **프론트 구성이 사용자 소관**이므로 **방아쇠: 001 구현 착수 전**에 확정하고 `quickstart.md` 명령을 함께 고친다 |
 
 **`.env.example` 갱신 완료** — 기존 `DB_*` · `JWT_SECRET` · `ADMIN_INITIAL_*` 에 더해
 **수명 키 4개**(`USER_ACCESS_TTL`·`USER_REFRESH_TTL`·`ADMIN_ACCESS_TTL`·`ADMIN_REFRESH_TTL`)와
