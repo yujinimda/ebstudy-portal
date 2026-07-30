@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────
+# 로컬 기동 — postgres + backend
+#
+#   docker compose up --build
+#
+# 프론트(frontend)는 이번 범위 밖이다. 들어오면 서비스가 하나 늘고
+# /api/* rewrite 가 백엔드를 감싼다(research.md 2).
+#
+# 값은 .env 가 있으면 거기서 온다(없어도 뜬다 — 아래 기본값).
+#   cp .env.example .env  후 값을 채운다. .env 는 커밋하지 않는다(원칙 VII).
+# ─────────────────────────────────────────────────────────────
+services:
+  postgres:
+    # ★ 태그를 고정한다. Testcontainers(PostgresContainer.IMAGE)와 같은 값이어야 한다
+    #   — 다르면 "테스트는 초록인데 로컬에서 다르게 동작"이 생긴다(ADR-003 리스크 2).
+    image: postgres:17.10
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-portal}
+      POSTGRES_USER: ${DB_USERNAME:-portal}
+      # 로컬 전용 기본값이다. 실제 비밀번호는 .env 에 둔다(저장소에 남기지 않는다).
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-portal}
+    healthcheck:
+      # 백엔드가 DB 보다 먼저 떠서 마이그레이션에 실패하는 것을 막는다
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-portal} -d ${POSTGRES_DB:-portal}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      # .env 가 없어도 기동한다 — 관리자 시딩만 건너뛴다
+      - path: .env
+        required: false
+    environment:
+      # stdout JSON 로깅 + SQL 로깅 끔 (application.yml 의 docker 프로필)
+      SPRING_PROFILES_ACTIVE: docker
+      # 컨테이너 네트워크 안에서는 호스트가 postgres 다 (.env 의 DB_URL 은 호스트용이라 무시한다)
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-portal}
+      DB_USERNAME: ${DB_USERNAME:-portal}
+      DB_PASSWORD: ${DB_PASSWORD:-portal}
+      # 로컬은 http 라 Secure 쿠키를 끈다. 배포에서는 반드시 true 다(기본값이 true 인 이유).
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      JWT_SECRET: ${JWT_SECRET:-}
+      ADMIN_INITIAL_ID: ${ADMIN_INITIAL_ID:-}
+      ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
+      TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+    ports:
+      # ⚠️ research.md 5 는 "백엔드 포트를 호스트로 열지 않는다"고 정했다(프록시 우회를 막기 위해).
+      #    지금은 프론트가 없어 이 포트가 유일한 진입점이므로 열어 둔다.
+      #    ★ frontend 서비스가 들어오는 시점에 이 3줄을 지우고 내부 네트워크로만 둔다.
+      #    호스트 8080 이 이미 쓰이고 있으면 .env 에 BACKEND_PORT=18080 처럼 적는다.
+      - "${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  pgdata:

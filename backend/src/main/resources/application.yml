@@ -1,0 +1,136 @@
+# ─────────────────────────────────────────────────────────────
+# process.md 4.10 — 값은 ${KEY} 로만 참조한다. 하드코딩 금지.
+#   여기 보이는 숫자는 "시크릿이 아닌 확정 기본값"이다(수명·임계값 — research.md 4·6).
+#   시크릿(JWT_SECRET · DB_PASSWORD · ADMIN_INITIAL_PASSWORD)에는 기본값을 두지 않는다.
+# ─────────────────────────────────────────────────────────────
+spring:
+  application:
+    name: ebstudy-portal-backend
+
+  # research.md 6 — 남용 방어의 지연이 OS 스레드를 점유하지 않게 한다
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/portal}
+    username: ${DB_USERNAME:portal}
+    password: ${DB_PASSWORD:}
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      # process.md 4.7 — 앱은 DDL 을 만들지 않는다. 스키마를 만드는 것은 Flyway 뿐이다.
+      # validate 는 "엔티티와 실제 스키마가 어긋났다"를 부팅 때 잡는 보조 안전망이다.
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    # AC-28 — 스프링 기본 오류 응답이 예외 메시지를 흘리지 않게 전부 끈다
+    whitelabel:
+      enabled: false
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+
+auth:
+  jwt-secret: ${JWT_SECRET:}
+
+  # FR-033 · AC-33 — 관리자가 반드시 더 짧다 (research.md 4)
+  user:
+    access-ttl: ${USER_ACCESS_TTL:PT30M}
+    refresh-ttl: ${USER_REFRESH_TTL:P14D}
+  admin:
+    access-ttl: ${ADMIN_ACCESS_TTL:PT15M}
+    refresh-ttl: ${ADMIN_REFRESH_TTL:P1D}
+
+  cookie:
+    # 기본은 켠 쪽이다. 반대로 두면 배포에서 켜는 것을 잊는다(contracts/auth-api.md)
+    secure: ${COOKIE_SECURE:true}
+    access-name: ACCESS_TOKEN
+    refresh-name: REFRESH_TOKEN
+    # Refresh 는 재발급·로그아웃 경로에만 실린다
+    refresh-path: /api/auth
+    same-site: Lax
+
+  password:
+    bcrypt-strength: ${PASSWORD_BCRYPT_STRENGTH:10}
+
+  # FR-027 · AC-29 (research.md 6)
+  fail:
+    delay-threshold: ${AUTH_FAIL_DELAY_THRESHOLD:3}
+    block-threshold: ${AUTH_FAIL_BLOCK_THRESHOLD:6}
+    block-duration: ${AUTH_FAIL_BLOCK_DURATION:PT60S}
+    window: ${AUTH_FAIL_WINDOW:PT15M}
+    cache-max-entries: ${AUTH_FAIL_CACHE_MAX_ENTRIES:10000}
+    delay-enabled: ${AUTH_FAIL_DELAY_ENABLED:true}
+
+  # FR-030 · AC-30
+  check-id:
+    rate-per-minute: ${CHECK_ID_RATE_LIMIT_PER_MINUTE:10}
+    cache-max-entries: ${CHECK_ID_CACHE_MAX_ENTRIES:10000}
+
+  # ★ 지정하지 않으면 X-Forwarded-For 를 신뢰하지 않는다(위조 방지)
+  trusted-proxy-cidrs: ${TRUSTED_PROXY_CIDRS:}
+
+  # FR-022 · FR-023 — 비어 있으면 시딩을 건너뛴다. 값은 .env 에만 둔다.
+  seed:
+    admin-username: ${ADMIN_INITIAL_ID:}
+    admin-password: ${ADMIN_INITIAL_PASSWORD:}
+    admin-name: ${ADMIN_INITIAL_NAME:관리자}
+
+  cleanup:
+    batch-size: ${TICKET_CLEANUP_BATCH_SIZE:1000}
+
+# 가입 입력 규칙 경계값 — 기본값은 spec.md 의 FR/AC 값이다(README "스펙과 어긋나 보이는 지점" 참조)
+signup:
+  username:
+    min: ${SIGNUP_USERNAME_MIN_LENGTH:4}
+    max: ${SIGNUP_USERNAME_MAX_LENGTH:11}
+  password:
+    min: ${SIGNUP_PASSWORD_MIN_LENGTH:8}
+    max: ${SIGNUP_PASSWORD_MAX_LENGTH:64}
+  name:
+    min: ${SIGNUP_NAME_MIN_LENGTH:2}
+    max: ${SIGNUP_NAME_MAX_LENGTH:50}
+  # bcrypt 는 72바이트에서 자른다 → 자르지 않고 거부한다
+  password-max-bytes: ${SIGNUP_PASSWORD_MAX_BYTES:72}
+
+logging:
+  level:
+    root: INFO
+
+---
+# ── docker · prod: stdout JSON 1줄 (process.md 4.9) ──────────
+# Hibernate show-sql 은 System.out 으로 직접 써서 구조화 로깅을 우회하고
+# 파라미터 로깅은 비밀번호가 새는 경로가 된다 → 이 프로필에서는 켜지 않는다(원칙 V · AC-36).
+spring:
+  config:
+    activate:
+      on-profile: docker | prod
+logging:
+  structured:
+    format:
+      console: ecs
+
+---
+# ── local · test: 사람이 읽는 콘솔 + SQL 로깅 (ADR-004 완화) ──
+spring:
+  config:
+    activate:
+      on-profile: local | test
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
