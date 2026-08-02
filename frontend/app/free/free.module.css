@@ -1,0 +1,254 @@
+/* 자유게시판 전용 스타일.
+   globals.css 는 손대지 않는다(다른 레인과 충돌한다). 색·반경은 globals.css 의
+   CSS 변수를 참조만 하므로 다크 모드가 그대로 따라온다. */
+
+/* globals.css 의 `main { max-width: 34rem }` 은 폼 화면 기준이다.
+   목록 표는 6컬럼이라 그 폭에서 다 찌그러진다. */
+.wide {
+  max-width: 64rem;
+}
+
+.pageHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── 목록 표 ────────────────────────────────────────── */
+
+/* 표가 좁은 화면에서 넘칠 때 페이지 전체가 가로로 흔들리지 않게 여기서만 스크롤한다. */
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table thead th {
+  border-bottom: 2px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+/* 제목만 줄어든다 — 나머지 컬럼은 내용 폭을 지킨다. */
+.colTitle {
+  width: 100%;
+  white-space: normal;
+}
+
+.colNum,
+.colViews {
+  text-align: right;
+  color: var(--muted);
+}
+
+.titleLink {
+  color: var(--fg);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.titleLink:hover {
+  text-decoration: underline;
+}
+
+.empty {
+  padding: 2.5rem 0;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ── 상세 ───────────────────────────────────────────── */
+
+.detailTitle {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.detailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0 0 0.9rem;
+  margin: 0 0 1.2rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+/* 사용자가 넣은 줄바꿈을 살린다. HTML 로 해석하지 않으므로 XSS 여지가 없다. */
+.content {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 6rem;
+  margin: 0 0 1.5rem;
+}
+
+.section {
+  margin: 1.5rem 0;
+}
+
+.sectionTitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0 0 0.5rem;
+}
+
+.fileList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.fileRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.fileName {
+  flex: 1;
+  word-break: break-all;
+}
+
+.fileSize {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* 표 안·행 안에서 쓰는 작은 버튼. globals.css 의 큰 버튼을 덮는다. */
+.smallButton {
+  padding: 0.25rem 0.55rem;
+  font-size: 0.78rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+/* 링크인데 버튼처럼 보여야 하는 것들(목록·수정·글 등록).
+   `<Link><button/></Link>` 로 감싸면 a 안에 button 이 들어가 HTML 로 유효하지 않다. */
+.buttonLink {
+  display: inline-block;
+  font: inherit;
+  padding: 0.55rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-fg);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.buttonLinkSecondary {
+  background: transparent;
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 1.5rem 0;
+}
+
+.actions .spacer {
+  flex: 1;
+}
+
+/* ── 댓글 ───────────────────────────────────────────── */
+
+.commentList {
+  list-style: none;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.commentItem {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.commentHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 0.25rem;
+}
+
+.commentAuthor {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.commentBody {
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.92rem;
+}
+
+/* globals.css 의 `form { flex-direction: column }` 을 살리되 간격만 좁힌다. */
+.commentForm {
+  gap: 0.5rem;
+}
+
+/* ── 등록 · 수정 폼 ─────────────────────────────────── */
+
+textarea.textarea {
+  font: inherit;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+  resize: vertical;
+}
+
+textarea.textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+select.select {
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* 제거 표시된 기존 첨부 — 지우지 않고 흐리게 남겨 되돌릴 수 있게 한다. */
+.removed .fileName {
+  text-decoration: line-through;
+  color: var(--muted);
+}

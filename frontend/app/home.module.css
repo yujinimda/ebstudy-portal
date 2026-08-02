@@ -1,0 +1,190 @@
+/* 메인 페이지 — 요구사항 2장. 4개 게시판 요약을 2열로 놓는다. */
+
+.hero {
+  padding: 3.5rem 0 2.5rem;
+}
+
+.hero h1 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  letter-spacing: -0.03em;
+  margin: 0 0 0.5rem;
+}
+
+.hero p {
+  color: var(--muted);
+  margin: 0;
+  font-size: 1.02rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding-bottom: 4rem;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  padding: 1.15rem 1.25rem 0.9rem;
+  min-height: 13rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.cardHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+}
+
+.cardHead h2 {
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.more {
+  font-size: 0.83rem;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.more:hover {
+  color: var(--accent);
+}
+
+/* ── 줄 목록 (공지 · 자유 · 문의) ─────────────────── */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rows li {
+  border-top: 1px solid var(--border-soft);
+}
+
+.rows li:first-child {
+  border-top: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  text-decoration: none;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+
+.row:hover .rowTitle {
+  color: var(--accent);
+}
+
+.rowCat {
+  flex: none;
+  font-size: 0.76rem;
+  color: var(--muted);
+  min-width: 2.6rem;
+}
+
+.rowTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rowMeta {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+/* ── 갤러리 카드 ──────────────────────────────────── */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.galleryRow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  text-decoration: none;
+  color: var(--fg);
+}
+
+.thumb {
+  flex: none;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
+}
+
+.thumbEmpty {
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.galleryText {
+  min-width: 0;
+}
+
+.galleryText strong {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.galleryRow:hover strong {
+  color: var(--accent);
+}
+
+.galleryText span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 1.5rem 0;
+  text-align: center;
+}
+
+.myInquiry {
+  margin-left: auto;
+  font-size: 0.83rem;
+}

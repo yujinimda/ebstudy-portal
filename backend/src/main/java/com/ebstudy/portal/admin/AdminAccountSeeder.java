@@ -5,8 +5,7 @@ import com.ebstudy.portal.user.Role;
 import com.ebstudy.portal.user.User;
 import com.ebstudy.portal.user.UserRepository;
 import java.time.OffsetDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,9 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
  * <p>FR-023 — 초기 비밀번호는 환경변수에만 있다. 저장소에 남기지 않으며 로그에도 찍지 않는다.
  */
 @Component
+@Slf4j
 public class AdminAccountSeeder implements ApplicationRunner {
-
-    private static final Logger log = LoggerFactory.getLogger(AdminAccountSeeder.class);
 
     private final UserRepository users;
     private final PasswordEncoder passwordEncoder;

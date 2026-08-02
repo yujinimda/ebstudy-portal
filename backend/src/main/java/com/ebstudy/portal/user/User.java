@@ -9,6 +9,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 유저 — data-model.md 논리 설계 + 물리 설계 5.6.
@@ -20,6 +23,10 @@ import java.time.OffsetDateTime;
  */
 @Entity
 @Table(name = "users")
+@Getter
+// Hibernate 가 DB 행을 객체로 되살릴 때 요구하는 인자 없는 생성자.
+// PROTECTED 인 것은 의도다 — 우리 코드는 create() 만 쓴다.
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -43,9 +50,6 @@ public class User {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    protected User() {
-    }
-
     private User(String username, String passwordHash, String name, Role role, OffsetDateTime createdAt) {
         this.username = username;
         this.passwordHash = passwordHash;
@@ -57,29 +61,5 @@ public class User {
     public static User create(String username, String passwordHash, String name, Role role,
             OffsetDateTime createdAt) {
         return new User(username, passwordHash, name, role, createdAt);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
     }
 }

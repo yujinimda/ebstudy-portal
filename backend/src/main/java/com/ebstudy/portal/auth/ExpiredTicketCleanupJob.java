@@ -1,8 +1,7 @@
 package com.ebstudy.portal.auth;
 
 import java.time.OffsetDateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,9 +17,9 @@ import org.springframework.stereotype.Component;
  * <p><b>전제: 서버 1대.</b> 방아쇠는 서버가 2대 이상이 되는 시점(그때 단일 실행 보장이 필요하다).
  */
 @Component
+@Slf4j
 public class ExpiredTicketCleanupJob {
 
-    private static final Logger log = LoggerFactory.getLogger(ExpiredTicketCleanupJob.class);
     private static final int MAX_BATCHES = 1000;
 
     private final RefreshTokenService refreshTokens;

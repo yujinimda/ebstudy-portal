@@ -1,0 +1,142 @@
+/* 공지사항 전용 스타일.
+   globals.css 는 손대지 않는다(다른 에이전트와 충돌한다). 색·반경은 :root 변수를
+   참조만 하므로 다크 모드가 그대로 따라온다. */
+
+/* globals.css 의 `main { max-width: 34rem }` 은 인증 폼 기준이라 목록 표에 좁다.
+   전역을 고치지 않고 이 화면에서만 넓힌다. */
+.page {
+  max-width: 60rem;
+}
+
+/* ── 목록 표 ────────────────────────────────────────── */
+
+/* 좁은 화면에서 표가 잘리지 않게 가로 스크롤을 준다. */
+.tableWrap {
+  overflow-x: auto;
+  border-top: 2px solid var(--fg);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+/* 제목만 남는 폭을 다 쓰고, 길면 말줄임 한다. */
+.titleCell {
+  width: 100%;
+  white-space: normal;
+}
+
+.numberCell,
+.viewCell {
+  text-align: right;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.dateCell {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ★ 요구사항 3.1 — 알림글(상단 고정)은 **배경색으로 구분**한다.
+   accent 를 옅게 깐다. color-mix 를 쓰면 라이트/다크 양쪽에서 한 줄로 해결된다. */
+.pinnedRow {
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+
+.pinnedRow .titleCell a {
+  font-weight: 700;
+}
+
+.table a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.table a:hover,
+.table a:focus-visible {
+  text-decoration: underline;
+}
+
+.empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* ── 상세 ───────────────────────────────────────────── */
+
+.detail {
+  border-top: 2px solid var(--fg);
+}
+
+.detailHead {
+  padding: 1rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.detailTitle {
+  margin: 0.3rem 0 0.5rem;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+/* 등록일 · 등록자 · 조회수 한 줄. */
+.detailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0;
+  font-size: 0.83rem;
+  color: var(--muted);
+}
+
+/* 본문은 사용자가 입력한 줄바꿈을 그대로 살린다.
+   ★ dangerouslySetInnerHTML 을 쓰지 않는다 — 서버가 평문으로 저장하므로
+     HTML 로 해석하면 그대로 XSS 통로가 된다. */
+.detailBody {
+  padding: 1.25rem 0.25rem;
+  border-bottom: 1px solid var(--border);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 8rem;
+}
+
+.detailActions {
+  display: flex;
+  justify-content: center;
+  margin: 1.25rem 0;
+}
+
+/* globals.css 의 `button.secondary` 와 같은 모양을 링크에 입힌다.
+   (a 안에 button 을 넣지 않기 위해 링크로 두었다) */
+.listLink {
+  font: inherit;
+  padding: 0.55rem 1.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.listLink:hover,
+.listLink:focus-visible {
+  border-color: var(--accent);
+}

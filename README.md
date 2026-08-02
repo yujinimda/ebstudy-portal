@@ -28,11 +28,28 @@ Spring Data JPA · Flyway · Spring Security(JWT 내장) · bcrypt
 docker compose up --build
 ```
 
-- `postgres` 가 healthy 가 된 뒤 `backend` 가 뜬다
+**→ http://localhost:3000 이 유일한 진입점이다.**
+
+- `postgres` → `backend` → `frontend` 순으로 뜬다
 - **Flyway 가 `V1`~`V4` 를 자동으로 적용**한다 (`Successfully applied 4 migrations` 로그)
 - `ddl-auto=validate` 가 엔티티와 스키마 일치를 확인한다 — **어긋나면 부팅이 실패한다**
 - 관리자 시딩은 `.env` 가 없으면 **건너뛴다**(경고 로그 1줄). 회원가입·로그인은 그대로 된다
 - 로그는 stdout **JSON 1줄**(ECS)로 나온다. `traceId` 가 오류 응답과 같은 값이다
+
+> ⚠️ **백엔드 포트는 호스트로 열려 있지 않다**(`research.md` 5). 브라우저가 프록시를
+> 우회하면 `X-Forwarded-For` 신뢰 경계가 무의미해져 `AC-30` 빈도 제한이 뚫린다.
+> 백엔드를 직접 호출해야 하면 `docker-compose.yml` 의 `ports` 주석 2줄을 푼다.
+
+### 화면
+
+| 경로 | 무엇 | 인증 |
+|---|---|---|
+| `/` | 홈. 로그인 상태 표시 | 불필요 |
+| `/signup` | 회원가입 + 중복확인 | 불필요 |
+| `/login` | 사용자 로그인 | 불필요 |
+| `/admin/login` | **관리자 별도 진입점**(`FR-032`) | 불필요 |
+| `/mypage` | 내 정보 — `AC-24` 목적지 복귀 확인용 | 필요 |
+| `/admin` | 관리자 — `AC-26`(화면에서 감춰도 서버가 막는다) 확인용 | `ADMIN` |
 
 정지·초기화:
 
@@ -53,7 +70,7 @@ cp .env.example .env
 JWT_SECRET=충분히-길고-무작위인-값
 ADMIN_INITIAL_ID=bossadmin
 ADMIN_INITIAL_PASSWORD=사람이-지어내지-않은-값
-BACKEND_PORT=8080          # 호스트 8080 이 이미 쓰이고 있으면 18080 등으로 바꾼다
+FRONTEND_PORT=3000         # 호스트 3000 이 이미 쓰이고 있으면 13000 등으로 바꾼다
 ```
 
 > `.env` 는 커밋되지 않는다(`.gitignore`). **관리자 초기 비밀번호는 저장소에 어떤 형태로도
@@ -67,10 +84,11 @@ BACKEND_PORT=8080          # 호스트 8080 이 이미 쓰이고 있으면 18080
 
 ## 2. 되는지 확인하기 — `curl`
 
-`BACKEND_PORT` 를 바꿨으면 아래 `8080` 을 그 값으로 바꾼다.
+**프론트 오리진을 통해 부른다**(`/api/*` 가 백엔드로 rewrite 된다). `FRONTEND_PORT` 를
+바꿨으면 아래 `3000` 을 그 값으로 바꾼다.
 
 ```bash
-B=http://localhost:8080
+B=http://localhost:3000
 
 # ── 회원가입 (201)
 curl -i -X POST $B/api/auth/signup \

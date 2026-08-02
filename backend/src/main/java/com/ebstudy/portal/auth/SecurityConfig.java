@@ -4,6 +4,7 @@ import com.ebstudy.portal.common.ProblemAuthEntryPoints;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+// 경비실 규칙표. "어떤 URL은 통과, 어떤 URL은 로그인 필수" 설정
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -47,8 +49,18 @@ public class SecurityConfig {
                                 "/api/auth/login", "/api/auth/refresh", "/api/auth/logout",
                                 "/api/admin/auth/login").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
-                        // FR-018 · AC-21·22·23 — 관리자 전용은 서버가 막는다
+                        // FR-018 · AC-21·22·23 — 관리자 전용은 서버가 막는다.
+                        // 아래 게시판 규칙보다 먼저 와야 한다 — 순서가 곧 우선순위다
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        // 002 요구사항 1.3 — 목록·상세 조회는 <b>누구나</b> 한다.
+                        // 읽기(GET)만 연다. 등록·수정·삭제는 아래 anyRequest 가 그대로 막는다
+                        .requestMatchers(HttpMethod.GET,
+                                "/api/categories/**", "/api/notices/**", "/api/free-posts/**",
+                                "/api/galleries/**", "/api/inquiries/**").permitAll()
+                        // 요구사항 6.2 — 비밀글 잠금해제는 <b>로그인이 필요 없다</b>.
+                        // 비밀번호를 아는 사람이 여는 경로이지 로그인한 사람이 여는 경로가 아니다
+                        // (남용은 SecretPasswordAttemptService 의 글·클라이언트 단위 임계가 막는다)
+                        .requestMatchers(HttpMethod.POST, "/api/inquiries/*/unlock").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtCookieAuthenticationFilter(cookies, jwtIssuer),
                         UsernamePasswordAuthenticationFilter.class)

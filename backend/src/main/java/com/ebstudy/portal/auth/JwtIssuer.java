@@ -13,8 +13,7 @@ import java.util.Optional;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -26,6 +25,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.stereotype.Component;
 
+// JWT 출입증 발급기 겸 검사기
 /**
  * Access 토큰 — JWT. 서명만 검증하고 DB 를 보지 않는다(ADR-001).
  * JWT 라이브러리를 따로 넣지 않고 <b>Spring Security 내장(Nimbus)</b>을 쓴다(research.md 10).
@@ -33,9 +33,8 @@ import org.springframework.stereotype.Component;
  * <p>Refresh 는 JWT 가 아니다 — {@link RefreshTokenService} 참조.
  */
 @Component
+@Slf4j
 public class JwtIssuer {
-
-    private static final Logger log = LoggerFactory.getLogger(JwtIssuer.class);
 
     private final JwtEncoder encoder;
     private final JwtDecoder decoder;

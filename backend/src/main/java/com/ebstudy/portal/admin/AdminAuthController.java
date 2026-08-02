@@ -4,6 +4,7 @@ import com.ebstudy.portal.auth.AuthController;
 import com.ebstudy.portal.auth.AuthCookies;
 import com.ebstudy.portal.auth.AuthService;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,15 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
  * 403 이 아니라 401 인 것도 같은 이유다.
  */
 @RestController
+@RequiredArgsConstructor
 public class AdminAuthController {
 
     private final AuthService authService;
     private final AuthCookies cookies;
-
-    public AdminAuthController(AuthService authService, AuthCookies cookies) {
-        this.authService = authService;
-        this.cookies = cookies;
-    }
 
     @PostMapping("/api/admin/auth/login")
     public AuthController.UserResponse login(@RequestBody AuthController.LoginRequest request,

@@ -6,6 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 사용불가 아이디 — FR-028. 코드가 아니라 데이터다(관리 화면은 004).
@@ -13,6 +16,8 @@ import jakarta.persistence.Table;
  */
 @Entity
 @Table(name = "reserved_usernames")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReservedUsername {
 
     @Id
@@ -21,15 +26,4 @@ public class ReservedUsername {
 
     @Column(name = "username", nullable = false, length = 255)
     private String username;
-
-    protected ReservedUsername() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
 }

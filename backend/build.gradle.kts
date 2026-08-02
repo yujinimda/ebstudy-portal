@@ -38,6 +38,12 @@ dependencies {
 
     runtimeOnly("org.postgresql:postgresql")
 
+    // 반복 코드 생성 — getter·생성자·logger. 컴파일 시점에만 필요하므로 compileOnly 다
+    // (런타임 산출물에 lombok.jar 가 들어가지 않는다).
+    // ⚠️ JDK 25 지원은 1.18.40 부터다. 그보다 낮은 버전으로 내려가면 컴파일이 깨진다.
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     // 통합 테스트는 실제 PostgreSQL 에 붙는다 (test-strategy.md 5.1)

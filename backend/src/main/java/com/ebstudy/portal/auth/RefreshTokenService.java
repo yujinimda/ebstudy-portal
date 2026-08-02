@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.Base64;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
  * DB 에는 SHA-256 해시만 둔다. 서버가 보관하는 이유는 <b>로그아웃을 성립시키는 것 하나</b>다(ADR-001).
  */
 @Service
+@RequiredArgsConstructor
 public class RefreshTokenService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
@@ -26,11 +28,6 @@ public class RefreshTokenService {
 
     private final RefreshTicketRepository tickets;
     private final AuthProperties properties;
-
-    public RefreshTokenService(RefreshTicketRepository tickets, AuthProperties properties) {
-        this.tickets = tickets;
-        this.properties = properties;
-    }
 
     public Duration refreshTtl(Role role) {
         return role == Role.ADMIN ? properties.admin().refreshTtl() : properties.user().refreshTtl();

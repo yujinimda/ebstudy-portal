@@ -3,6 +3,7 @@ package com.ebstudy.portal.common;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -17,13 +18,10 @@ import org.springframework.stereotype.Component;
  * 다른 오류와 갈라지지 않게 하는 장치다.
  */
 @Component
+@RequiredArgsConstructor
 public class ProblemAuthEntryPoints {
 
     private final ProblemDetailFactory problems;
-
-    public ProblemAuthEntryPoints(ProblemDetailFactory problems) {
-        this.problems = problems;
-    }
 
     /** AC-21 — 미인증. */
     public AuthenticationEntryPoint entryPoint() {

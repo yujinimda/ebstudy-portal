@@ -3,6 +3,7 @@ package com.ebstudy.portal.user;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
+ * 가입 규칙 숫자를 담는 상자 상수들 모아둔곳
  * 가입 입력 규칙의 경계값. <b>전부 환경변수로 바꿀 수 있다</b>(application.yml 의 {@code ${KEY}}).
  *
  * <p>기본값은 {@code spec.md} 의 FR/AC 값이다 — 아이디 4~11자(FR-003) · 비밀번호 8~64자(FR-006) ·
@@ -14,6 +15,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * 그래서 자르지 않고 <b>거부</b>한다.
  */
 @ConfigurationProperties(prefix = "signup")
+// record: 값만 담는 읽기 전용 객체
 public record SignupPolicy(Bounds username, Bounds password, Bounds name, int passwordMaxBytes) {
 
     /** 둘 다 포함(inclusive). "12자 미만" 은 max=11 로 적는다. */

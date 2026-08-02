@@ -11,6 +11,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 재발급 티켓 — "로그인마다 하나"다(기기마다가 아니다, data-model.md).
@@ -21,30 +24,34 @@ import java.time.OffsetDateTime;
  */
 @Entity
 @Table(name = "refresh_tickets")
+// ★ 클래스에 @Getter 를 붙이지 않는다 — tokenHash·createdAt 까지 열리고,
+//   특히 byte[] 는 내보내면 호출자가 배열 내용을 바꿀 수 있다. 필요한 4개만 필드에 붙인다.
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class RefreshTicket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @Getter
     private User user;
 
     @Column(name = "token_hash", nullable = false, unique = true)
     private byte[] tokenHash;
 
     @Column(name = "expires_at", nullable = false)
+    @Getter
     private OffsetDateTime expiresAt;
 
     @Column(name = "revoked", nullable = false)
+    @Getter
     private boolean revoked;
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
-
-    protected RefreshTicket() {
-    }
 
     private RefreshTicket(User user, byte[] tokenHash, OffsetDateTime expiresAt,
             OffsetDateTime createdAt) {
@@ -63,21 +70,5 @@ public class RefreshTicket {
     /** FR-014 · AC-35 — 이 <b>한 행만</b> 무효화한다. 유저 기준으로 지우면 다른 기기가 튕겨 나간다. */
     public void revoke() {
         this.revoked = true;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public OffsetDateTime getExpiresAt() {
-        return expiresAt;
-    }
-
-    public boolean isRevoked() {
-        return revoked;
     }
 }

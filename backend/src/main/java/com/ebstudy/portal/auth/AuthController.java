@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** contracts/auth-api.md 1·2·3·5·6번 엔드포인트. */
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final SignupService signupService;
@@ -30,17 +32,6 @@ public class AuthController {
     private final AuthCookies cookies;
     private final CheckIdRateLimiter checkIdRateLimiter;
     private final ClientIpResolver clientIpResolver;
-
-    public AuthController(SignupService signupService, AuthService authService,
-            RefreshTokenService refreshTokens, AuthCookies cookies,
-            CheckIdRateLimiter checkIdRateLimiter, ClientIpResolver clientIpResolver) {
-        this.signupService = signupService;
-        this.authService = authService;
-        this.refreshTokens = refreshTokens;
-        this.cookies = cookies;
-        this.checkIdRateLimiter = checkIdRateLimiter;
-        this.clientIpResolver = clientIpResolver;
-    }
 
     public record SignupRequest(String username, String password, String name) {
     }

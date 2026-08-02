@@ -1,0 +1,194 @@
+/* 게시판 공통 스타일.
+   globals.css 는 손대지 않는다(다른 에이전트와 충돌한다) — 그래서 module.css 다.
+   색·반경은 globals.css 가 정의한 CSS 변수를 그대로 쓴다. 변수는 :root 에 있으므로
+   여기서 참조만 하면 다크 모드도 따라온다. */
+
+/* ── 검색바 ─────────────────────────────────────────── */
+
+/* globals.css 의 `form { flex-direction: column }` 을 덮는다. */
+.searchBar {
+  display: block;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.searchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.75rem;
+  align-items: flex-end;
+}
+
+.searchField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.searchField > span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* globals.css 의 `input { width: 100% }` 때문에 플렉스 안에서 전부 늘어난다. */
+.control {
+  font: inherit;
+  width: auto;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.control:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.keywordField {
+  flex: 1 1 14rem;
+}
+
+.keywordField .control {
+  width: 100%;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  padding-bottom: 0.45rem;
+}
+
+.checkbox input {
+  width: auto;
+  margin: 0;
+}
+
+.searchHint {
+  display: block;
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* ── 목록 툴바 ──────────────────────────────────────── */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 0.75rem;
+}
+
+.toolbarControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.total {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.total strong {
+  color: var(--fg);
+}
+
+/* ── 페이징 ─────────────────────────────────────────── */
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+  justify-content: center;
+  margin: 1.25rem 0;
+}
+
+.pageButton {
+  min-width: 2.1rem;
+  padding: 0.3rem 0.5rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+.pageButtonCurrent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-fg);
+  font-weight: 700;
+}
+
+/* ── 작은 표시 ──────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  margin-left: 0.3rem;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+
+.badgeNew {
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
+.badgeOk {
+  color: var(--ok);
+  background: var(--ok-bg);
+}
+
+.badgeMuted {
+  color: var(--muted);
+  background: transparent;
+}
+
+.commentCount {
+  margin-left: 0.3rem;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.attachmentIcon {
+  margin-left: 0.3rem;
+  vertical-align: -0.15em;
+  color: var(--muted);
+}
+
+/* 스크린리더 전용 — 아이콘만 있는 표시에 이름을 준다. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

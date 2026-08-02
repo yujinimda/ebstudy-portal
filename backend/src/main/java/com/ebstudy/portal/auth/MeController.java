@@ -4,6 +4,7 @@ import com.ebstudy.portal.common.ApiException;
 import com.ebstudy.portal.common.ErrorCode;
 import com.ebstudy.portal.user.User;
 import com.ebstudy.portal.user.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,13 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
  * 스텁이 아니다: 화면 헤더의 로그인 정보로 계속 쓰이고 {@code AC-4} 검증 대상이다(research.md 12).
  */
 @RestController
+@RequiredArgsConstructor
 public class MeController {
 
     private final UserRepository users;
-
-    public MeController(UserRepository users) {
-        this.users = users;
-    }
 
     @GetMapping("/api/me")
     public AuthController.UserResponse me(@AuthenticationPrincipal AuthenticatedUser principal) {

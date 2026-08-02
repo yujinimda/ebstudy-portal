@@ -17,6 +17,13 @@ RUN ./gradlew --no-daemon bootJar -x test
 FROM eclipse-temurin:25.0.3_9-jre
 WORKDIR /app
 RUN useradd --system --uid 10001 portal
+
+# ★ 첨부 저장 디렉터리를 **이미지 안에 미리 만들고 소유권을 준다.**
+#   도커는 named volume 을 처음 붙일 때 이미지의 해당 경로 권한을 복사한다.
+#   여기서 안 만들면 볼륨이 root 소유로 생기고, portal(10001) 이 쓰지 못해
+#   업로드가 전부 실패한다(실제로 겪었다 — Permission denied).
+RUN mkdir -p /var/lib/ebstudy/attachments && chown -R portal /var/lib/ebstudy
+
 COPY --from=build /workspace/build/libs/*.jar /app/app.jar
 USER portal
 EXPOSE 8080

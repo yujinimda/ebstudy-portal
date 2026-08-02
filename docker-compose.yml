@@ -1,10 +1,11 @@
 # ─────────────────────────────────────────────────────────────
-# 로컬 기동 — postgres + backend
+# 로컬 기동 — postgres + backend + frontend
 #
 #   docker compose up --build
+#   → http://localhost:3000  (유일한 진입점)
 #
-# 프론트(frontend)는 이번 범위 밖이다. 들어오면 서비스가 하나 늘고
-# /api/* rewrite 가 백엔드를 감싼다(research.md 2).
+# ★ 진입점은 프론트 하나다. 브라우저는 항상 프론트 오리진의 /api/* 를 부르고
+#   Next.js rewrite 가 백엔드로 넘긴다(research.md 2) → CORS 설정이 없다.
 #
 # 값은 .env 가 있으면 거기서 온다(없어도 뜬다 — 아래 기본값).
 #   cp .env.example .env  후 값을 채운다. .env 는 커밋하지 않는다(원칙 VII).
@@ -27,6 +28,15 @@ services:
       retries: 20
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # 개발용 DB 뷰어 — http://localhost:8081 (서버: postgres · 유저/비번/DB: portal)
+  # 로컬 전용이다. 127.0.0.1 바인딩이라 같은 기계에서만 접속된다.
+  adminer:
+    image: adminer
+    depends_on:
+      - postgres
+    ports:
+      - "127.0.0.1:8081:8080"
 
   backend:
     build:
@@ -51,12 +61,38 @@ services:
       ADMIN_INITIAL_ID: ${ADMIN_INITIAL_ID:-}
       ADMIN_INITIAL_PASSWORD: ${ADMIN_INITIAL_PASSWORD:-}
       TRUSTED_PROXY_CIDRS: ${TRUSTED_PROXY_CIDRS:-}
+      # ★ 첨부·갤러리 이미지 저장 위치. 기본값은 컨테이너의 /tmp 라서
+      #   재빌드하면 파일이 통째로 사라지고 DB 행만 남아 상세 화면이 404 가 된다(실제로 겪었다).
+      #   아래 볼륨과 짝이다 — 둘 중 하나만 바꾸면 다시 날아간다.
+      BOARD_ATTACHMENT_ROOT: /var/lib/ebstudy/attachments
+    volumes:
+      - attachments:/var/lib/ebstudy/attachments
+    # ★ 백엔드 포트를 호스트로 열지 않는다 — research.md 5.
+    #   열어 두면 브라우저가 프록시를 우회해 직접 부를 수 있고, 그러면 X-Forwarded-For
+    #   신뢰 경계(ClientIpResolver)가 무의미해져 AC-30 빈도 제한이 뚫린다.
+    #   frontend 서비스가 생기면서 이 포트가 유일 진입점이 아니게 됐으므로 닫았다.
+    #
+    #   디버깅으로 직접 호출해야 하면 .env 에 BACKEND_PORT 를 적고 아래 2줄의 주석을 푼다.
+    # ports:
+    #   - "${BACKEND_PORT:-8080}:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # ★ 실행 시점 environment 가 아니라 **빌드 인자**다.
+        #   next build 가 rewrites() 를 평가해 매니페스트에 목적지를 굽기 때문에
+        #   나중에 환경변수로 바꿔도 반영되지 않는다.
+        #   컨테이너 네트워크 안에서는 호스트 이름이 backend 다.
+        BACKEND_ORIGIN: http://backend:8080
+    depends_on:
+      - backend
     ports:
-      # ⚠️ research.md 5 는 "백엔드 포트를 호스트로 열지 않는다"고 정했다(프록시 우회를 막기 위해).
-      #    지금은 프론트가 없어 이 포트가 유일한 진입점이므로 열어 둔다.
-      #    ★ frontend 서비스가 들어오는 시점에 이 3줄을 지우고 내부 네트워크로만 둔다.
-      #    호스트 8080 이 이미 쓰이고 있으면 .env 에 BACKEND_PORT=18080 처럼 적는다.
-      - "${BACKEND_PORT:-8080}:8080"
+      # 유일한 진입점.
+      - "${FRONTEND_PORT:-3000}:3000"
 
 volumes:
   pgdata:
+  # 업로드된 첨부·이미지. DB 행과 짝이므로 pgdata 와 함께 지워야 한다
+  # (`docker compose down -v` 는 둘 다 지운다).
+  attachments:
